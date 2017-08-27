@@ -13,7 +13,12 @@ target_dir = "static/image"
 def process_image(image_filename):
     image = Image.open(image_filename)
     _exif = image._getexif()
-    tick_info = exif_to_tick(_exif[36867])
+    try:
+        tick_info = exif_to_tick(_exif[36867])
+    except:
+        tick_info = os.path.getmtime(image_filename)
+        print("Warning: No exif time in %s" % image_filename)
+
     emodel = EventModel(
         tick=tick_info,
         title="Title",

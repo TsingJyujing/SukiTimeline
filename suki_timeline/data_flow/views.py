@@ -9,7 +9,7 @@ import string
 from django.views.decorators.csrf import csrf_exempt
 
 from data_flow.models import EventModel
-from util import tick_to_string
+from util import tick_to_string, string_to_tick
 
 
 def render_index(request):
@@ -48,6 +48,7 @@ def post_data(request):
         emodel = EventModel.objects.get(id=string.atoi(request.POST["id"]))
         emodel.title = request.POST["title"]
         emodel.comment = request.POST["comment"]
+        emodel.tick = string_to_tick(request.POST["tick"])
         emodel.save()
         return HttpResponse(json.dumps(
             {"status": "success"}

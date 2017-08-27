@@ -56,7 +56,7 @@
     var _timeline_row_ = $("<div></div>").addClass("row");
 
     var current_offset = 0;
-    var page_size = 4;
+    var page_size = 40;
 
     function load_data() {
         $.getJSON("/get/data/timeline",
@@ -158,7 +158,7 @@
             var scrollTop = $(this).scrollTop();
             var scrollHeight = $(document).height();
             var windowHeight = $(this).height();
-            if (scrollTop + windowHeight == scrollHeight) {
+            if (scrollTop + windowHeight >= scrollHeight) {
                 //此处是滚动条到底部时候触发的事件，在这里写要加载的数据，或者是拉动滚动条的操作
                 load_data();
             }

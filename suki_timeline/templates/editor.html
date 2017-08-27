@@ -41,6 +41,13 @@
                             <input id="input_comment" type="text" class="form-control" id="basic-url"
                                    aria-describedby="basic-addon3">
                         </div>
+                        <br>
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon3">时间</span>
+                            <input id="input_tick" type="text" class="form-control" id="basic-url"
+                                   aria-describedby="basic-addon3">
+                        </div>
+
                     </form>
                 </div>
 
@@ -127,17 +134,19 @@
                         var frm_width = $(document).width() - 10;
                         $("#input_title").val(tl["title"]);
                         $("#input_comment").val(tl["comment"]);
-
+                        $("#input_tick").val(tl["tick"]);
                         //模态窗口的点击事件
                         $("#modal_commit").click(
                             function () {
                                 var input_title = $("#input_title").val();
                                 var input_comment = $("#input_comment").val();
+                                var input_tick = $("#input_tick").val();
                                 $.post(
                                     "/post/data/timeline", {
                                         "id": tl["id"],
                                         "title": input_title,
-                                        "comment": input_comment
+                                        "comment": input_comment,
+                                        "tick": input_tick
                                     }, function (data) {
                                         var js_data = JSON.parse(data);
                                         if (js_data["status"] === "success") {
@@ -162,13 +171,13 @@
 
                     var _img_container_ = $("<div></div>")
                         .addClass("pull-left")
-                        .append(_img);
+                        .append(_img).append("<br/>");
                     var _text_container_ = $("<p></p>").css({
                         "margin-left": "10px",
                         "margin-top": "5px",
                         "font-size": "12px"
-                    })
-                        .append(_comment).append("<br/>");
+                    }).
+                        append(_comment).append("<br/>");
                     _popover_content_.append(_img_container_).append(_text_container_);
 
 
