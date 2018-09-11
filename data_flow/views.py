@@ -1,5 +1,5 @@
 import sqlite3
-
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 import json
@@ -12,17 +12,19 @@ from data_flow.models import EventModel
 from util import tick_to_string, string_to_tick
 
 
+@login_required
 def render_index(request):
     return render(request, "viewer.html")
 
 
+@login_required
 def render_editor(request):
     return render(request, "editor.html")
 
 
 def get_data(request):
-    offset = string.atoi(request.GET["offset"])
-    page_size = string.atoi(request.GET["n"])
+    offset = int(request.GET["offset"])
+    page_size = int(request.GET["n"])
     sql_model = "SELECT id,tick,title,comment FROM data_flow_eventmodel ORDER BY tick LIMIT %d OFFSET %d"
     conn = sqlite3.connect("db.sqlite3")
     cursor = conn.execute(sql_model % (page_size, offset))
@@ -42,10 +44,11 @@ def get_data(request):
     ))
 
 
+@login_required
 @csrf_exempt
-def post_data(request):
+def modify_info(request):
     try:
-        emodel = EventModel.objects.get(id=string.atoi(request.POST["id"]))
+        emodel = EventModel.objects.get(id=int(request.POST["id"]))
         emodel.title = request.POST["title"]
         emodel.comment = request.POST["comment"]
         emodel.tick = string_to_tick(request.POST["tick"])
