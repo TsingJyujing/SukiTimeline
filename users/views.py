@@ -1,4 +1,5 @@
 from django.contrib.auth import login
+from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import AuthenticationForm
 
@@ -15,7 +16,11 @@ def login_view(request):
             return redirect("/")
         else:
             print("User {} login failed.".format(form.get_user()))
-    else:
-        # 请求不是 POST，构造一个空表单
-        form = AuthenticationForm()
-    return render(request, 'login.html', context={'form': form})
+
+    try:
+        token = request.COOKIES['csrftoken']
+    except:
+        token = get_token(request)
+    return render(request, 'login.html', context={
+        "csrf_token": token
+    })
