@@ -24,7 +24,8 @@ urlpatterns = [
     url(r'^users/', include('users.urls')),
     url(r'^users/', include('django.contrib.auth.urls')),
     url(r'^$', data_flow.views.render_index),
-    url(r'^get/data/timeline', data_flow.views.get_data),
+    url(r'^images/query', data_flow.views.query_images),
     url(r'^editor/', data_flow.views.render_editor),
-    url(r'^post/data/timeline', data_flow.views.modify_info),
+    url(r'^image/modify', data_flow.views.modify_image),
+    url(r'^image/delete', data_flow.views.remove_image),
 ]
