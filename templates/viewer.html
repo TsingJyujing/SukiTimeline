@@ -58,20 +58,21 @@
     const _timeline_row_ = $("<div></div>").addClass("row");
 
     let current_offset = 0;
-    let page_size = 10;
+    const page_size = 10;
+
 
     function load_data() {
+        const query_condition = {
+            offset: current_offset,
+            n: page_size,
+            "sort": "tick"
+        };
+        current_offset += page_size;
         $.getJSON("/images/query",
-            {
-                offset: current_offset,
-                n: page_size,
-                "sort":"tick"
-            },
+            query_condition,
             function (data) {
                 if (data.length < 1) {
                     return;
-                } else {
-                    current_offset += data.length;
                 }
 
                 $.each(data, function (i, tl) {
@@ -162,7 +163,7 @@
             const scrollTop = $(this).scrollTop();
             const scrollHeight = $(document).height();
             const windowHeight = $(this).height();
-            if (scrollTop + windowHeight >= (scrollHeight - 20)) {
+            if (scrollTop + windowHeight >= (scrollHeight - 50)) {
                 //此处是滚动条到底部时候触发的事件，在这里写要加载的数据，或者是拉动滚动条的操作
                 load_data();
             }
