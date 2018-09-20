@@ -112,7 +112,7 @@ def query_images(request):
     return [
         {
             "id": row[0],
-            "tick": tick_to_string(row[1] + 3600*8),
+            "tick": tick_to_string(row[1]),
             "title": row[2],
             "comment": row[3],
         }
