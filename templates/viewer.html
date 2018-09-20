@@ -16,12 +16,13 @@
     <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
 
     <!-- 模态框（Modal） -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="display_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
+                        X
                     </button>
                     <h4 class="modal-title" id="modal_title"></h4>
                 </div>
@@ -41,7 +42,8 @@
     <header class="page-header">
         <h1>我们的回忆时间流</h1>
         <h1>
-            <small>好き Timeline</small>
+            <small>好き Timeline <a href="/editor/">编辑回忆</a></small>
+
         </h1>
     </header>
 
@@ -62,7 +64,8 @@
         $.getJSON("/images/query",
             {
                 offset: current_offset,
-                n: page_size
+                n: page_size,
+                "sort":"tick"
             },
             function (data) {
                 if (data.length < 1) {
@@ -93,18 +96,18 @@
                      * 主页展示内容布局
                      */
 
-                    // 获取相应的图片的逻辑
-                    const _img = $("<img/>").attr("src", "/static/image/" + tl["id"] + "_thumbnail.jpg").css({
-                        "margin": "5px 10px",
-                        "width": "95%",
-                        "height": "95%"
-                    });
+                        // 获取相应的图片的逻辑
+                    const _img = $("<img/>").attr("src", `/images/get/thumbnail/?id=${tl["id"]}&resize=320x240`).css({
+                            "margin": "5px 10px",
+                            "width": "95%",
+                            "height": "95%"
+                        });
 
                     _img.click(function () {
                         //显示相应的模态
                         $("#modal_title").text(tl["title"]);
-                        $("#modal_image").attr("src", "/static/image/" + tl["id"] + ".jpg");
-                        const modal_window = $("#myModal");
+                        $("#modal_image").attr("src", `/images/get/raw/?id=${tl["id"]}&resize=640x480`);
+                        const modal_window = $("#display_modal");
                         const frm_width = $(document).width() - 10;
                         modal_window.attr({
                             "style": "z-index: 9999;",
@@ -156,10 +159,10 @@
         load_data();
         //设置滚动事件
         $(window).on('scroll', function () {
-            var scrollTop = $(this).scrollTop();
-            var scrollHeight = $(document).height();
-            var windowHeight = $(this).height();
-            if (scrollTop + windowHeight >= scrollHeight) {
+            const scrollTop = $(this).scrollTop();
+            const scrollHeight = $(document).height();
+            const windowHeight = $(this).height();
+            if (scrollTop + windowHeight >= (scrollHeight - 20)) {
                 //此处是滚动条到底部时候触发的事件，在这里写要加载的数据，或者是拉动滚动条的操作
                 load_data();
             }

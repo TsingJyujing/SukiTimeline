@@ -7,3 +7,4 @@ class EventModel(models.Model):
     tick = models.FloatField(unique=True)
     title = models.TextField(max_length=30)
     comment = models.TextField(max_length=1000)
+    image_hash = models.TextField(max_length=128)

@@ -5,9 +5,14 @@ from data_flow.models import EventModel
 from util.files import filter_images
 from util import *
 import traceback
+import imagehash
 
 raw_image_dir = "raw_files"
-target_dir = "static/image"
+target_dir = "data"
+
+
+def hash_algorithm(file):
+    return str(imagehash.average_hash(Image.open(file), hash_size=10))
 
 
 def process_image(image_filename):
@@ -18,17 +23,17 @@ def process_image(image_filename):
     except:
         tick_info = os.path.getmtime(image_filename)
         print("Warning: No exif time in %s" % image_filename)
-
+    hash_value = str(imagehash.average_hash(image, hash_size=10))
     emodel = EventModel(
         tick=tick_info,
         title="Title",
-        comment=image_filename
+        comment=image_filename,
+        image_hash=hash_value
     )
     emodel.save()
     img_id = emodel.id
-    image.save(os.path.join(target_dir, "%d.jpg" % img_id))
-    image.thumbnail((320, 240))
-    image.save(os.path.join(target_dir, "%d_thumbnail.jpg" % img_id))
+    image.save(os.path.join(target_dir, "%s.jpg" % hash_value))
+
 
 
 def clean_table():

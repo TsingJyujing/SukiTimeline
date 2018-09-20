@@ -11,9 +11,36 @@
     <link rel="stylesheet" type="text/css" media="all" href="/static/css/control.css">
     <script type="text/javascript" src="/static/js/jquery.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/js/jquery.loadTemplate.min.js"></script>
-    <!-- 修改用模态框（Modal） -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="upload_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">上传我们的回忆</h4>
+                </div>
+                <div class="container" style="height: 50px;">
+                    <div class="col-lg-3">
+                        <input id="file" class="input-lg" type="file" name="选择回忆上传"/>
+                    </div>
+                    <div class="col-lg-1">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-md btn-info" onclick="upload_file()" data-dismiss="modal">上传回忆</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -66,9 +93,12 @@
         <h1>图片编辑器</h1>
         <h1>
             <small>好き Timeline</small>
+            <button class="btn btn-primary" onclick="show_upload()">+</button>
         </h1>
 
+
         <div class="form-group">
+
             <input type="text"
                    name="keywords"
                    autofocus=""
@@ -125,7 +155,7 @@
     const current_offset = current_page * page_size;
 
 
-    $("#text-keywords").val( "{{ keywords }}" );
+    $("#text-keywords").val("{{ keywords }}");
     document.getElementById("text-keywords").addEventListener("keyup", function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
@@ -142,6 +172,41 @@
         window.location.href = `/editor/?n=${n}&q=${q}`;
     }
 
+    /**
+     * 显示上传页面
+     */
+    function show_upload() {
+        const modal_window = $("#upload_modal");
+        const frm_width = $(document).width() - 10;
+        modal_window.attr({
+            "style": "z-index: 9999;",
+            "width": frm_width + "px"
+        });
+        modal_window.modal({
+            keyboard: false
+        });
+    }
+
+    /**
+     * 上传文件
+     */
+    function upload_file() {
+        const formData = new FormData();
+        formData.append('file', $('#file')[0].files[0]);
+        $.ajax({
+            url: '/image/upload',
+            type: 'POST',
+            cache: false,
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function (res) {
+            modify_image_info(res.image_id);
+            console.log("File upload triggered");
+        }).fail(function (res) {
+            console.log("File upload filed.");
+        });
+    }
 
     /**
      * 删除照片
@@ -151,8 +216,19 @@
     function delete_image(id, title) {
         if (confirm(`您确定要删除这个回忆（${title}）吗？`)) {
             console.log("delete image " + id);
-            // TODO 调用后端接口删除照片
-            reload_page()
+            $.post(
+                "/image/delete", {
+                    "id": id
+                }, function (data) {
+                    if (data.status !== "success") {
+                        alert("删除失败！")
+                    } else {
+                        alert("删除成功！")
+                        reload_page();
+                    }
+                }
+            );
+
         }
     }
 
@@ -190,51 +266,58 @@
     /**
      * 修改某张照片的信息
      * @param id 照片ID
-     * @param title 默认标题
-     * @param comment 默认解说
-     * @param tick 默认显示时间
      */
-    function modify_image_info(id, title, comment, tick) {
-        //显示相应的模态
-        $("#modal_title").text("修改");
-        $("#modal_image").attr("src", "/static/image/" + id + ".jpg");
-        const modal_window = $("#myModal");
-        const frm_width = $(document).width() - 10;
-        $("#input_title").val(title);
-        $("#input_comment").val(comment);
-        $("#input_tick").val(tick);
-        //模态窗口的点击事件
-        $("#modal_commit").click(
-            function () {
-                const input_title = $("#input_title").val();
-                const input_comment = $("#input_comment").val();
-                const input_tick = $("#input_tick").val();
-                $.post(
-                    "/image/modify", {
-                        "id": id,
-                        "title": input_title,
-                        "comment": input_comment,
-                        "tick": input_tick
-                    }, function (data) {
-                        const js_data = JSON.parse(data);
-                        if (js_data["status"] === "success") {
-                            console.log("提交成功");
-                            location.reload();
-                        } else {
-                            console.error(js_data);
-                            alert("修改失败");
-                        }
+    function modify_image_info(id) {
+        $.getJSON(
+            "/images/get/info/",
+            {
+                "id": id
+            },
+            function (resp) {
+                const title = resp["data"]["title"];
+                const comment = resp["data"]["comment"];
+                const tick = resp["data"]["tick"];
+                //显示相应的模态
+                $("#modal_title").text("修改");
+                $("#modal_image").attr("src", `/images/get/thumbnail/?id=${id}&resize=320x240`);
+                const modal_window = $("#edit_modal");
+                const frm_width = $(document).width() - 10;
+                $("#input_title").val(title);
+                $("#input_comment").val(comment);
+                $("#input_tick").val(tick);
+                //模态窗口的点击事件
+                $("#modal_commit").click(
+                    function () {
+                        const input_title = $("#input_title").val();
+                        const input_comment = $("#input_comment").val();
+                        const input_tick = $("#input_tick").val();
+                        $.post(
+                            "/image/modify", {
+                                "id": id,
+                                "title": input_title,
+                                "comment": input_comment,
+                                "tick": input_tick
+                            }, function (data) {
+                                if (data["status"] === "success") {
+                                    console.log("提交成功");
+                                    reload_page()
+                                } else {
+                                    console.error(js_data);
+                                    alert("修改失败");
+                                }
+                            }
+                        );
                     }
                 );
+                modal_window.attr({
+                    "style": "z-index: 9999;",
+                    "width": frm_width + "px"
+                });
+                modal_window.modal({
+                    keyboard: false
+                });
             }
         );
-        modal_window.attr({
-            "style": "z-index: 9999;",
-            "width": frm_width + "px"
-        });
-        modal_window.modal({
-            keyboard: false
-        });
     }
 
     /**
@@ -245,7 +328,8 @@
             {
                 offset: current_offset,
                 n: page_size,
-                keywords: keywords
+                keywords: keywords,
+                "sort": "id desc"
             },
             function (data) {
                 const main_container = $("#main-container");
@@ -258,21 +342,32 @@
                     const title = image_info["title"];
                     const comment = image_info["comment"];
                     const tick = image_info["tick"];
-                    const thumb_image = `/static/image/${id}_thumbnail.jpg`;
-                    const full_image = `/static/image/${id}_thumbnail.jpg`;
+                    const thumb_image = `/images/get/thumbnail/?id=${id}&resize=320x240`;
                     main_container.append(
                         $("<div></div>").addClass(
                             "panel panel-info"
-                        ).loadTemplate(
-                            $("#item-template"),
-                            {
-                                "item-image-url": thumb_image,
-                                "item-title": title,
-                                "item-comment": comment,
-                                "item-tick": tick,
-                                "item-modify-id": btn_modify_id,
-                                "item-delete-id": btn_delete_id,
-                            }
+                        ).append(
+                            $(
+                                `
+                        <div class="panel-heading">
+                        ${title}
+                        </div>
+                        <div class="panel-body">
+                            <div class="media">
+                                <div class="media-left media-middle thumbs_block">
+                                    <img class="media-object" src="${thumb_image}" alt="img"
+                                         style="max-width: 150px"/>
+                                </div>
+                                <div class="media-body">
+                                    <p>${comment}</p>
+                                    <p>${tick}</p>
+                                    <button class="btn btn-default" id="${btn_modify_id}">修改</button>
+                                    <button class="btn btn-default" id="${btn_delete_id}">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                            )
                         )
                     );
                     $("#" + btn_modify_id).click(function () {
