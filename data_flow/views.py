@@ -165,8 +165,7 @@ def remove_image(request):
     return {"status": "success"}
 
 
-@login_required
-@csrf_exempt  # TODO 使用 AJAX 认证
+@csrf_exempt
 @response_json
 def upload_file(request):
     image = Image.open(request.FILES["file"])
