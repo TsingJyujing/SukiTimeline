@@ -129,25 +129,6 @@
 
 </div>
 
-<script type="text/html" id="item-template">
-    <div class="panel-heading" data-content="item-title"></div>
-    <div class="panel-body">
-        <div class="media">
-            <div class="media-left media-middle thumbs_block">
-                <img class="media-object" data-src="item-image-url" alt="img"
-                     style="max-width: 150px"/>
-            </div>
-            <div class="media-body">
-                <p data-content="item-comment"></p>
-                <p data-content="item-tick"></p>
-                <button class="btn btn-default" data-id="item-modify-id">修改</button>
-                <button class="btn btn-default" data-id="item-delete-id">删除</button>
-            </div>
-        </div>
-    </div>
-
-</script>
-
 <script type="text/javascript">
     const page_size = 10;
     const current_page = parseInt("{{ current_page }}");
@@ -339,6 +320,7 @@
                     const id = image_info["id"];
                     const btn_modify_id = `edit_image_${id}`;
                     const btn_delete_id = `delete_image_${id}`;
+                    const btn_rotate_id = `rotate_image_${id}`;
                     const title = image_info["title"];
                     const comment = image_info["comment"];
                     const tick = image_info["tick"];
@@ -355,7 +337,7 @@
                             <div class="media">
                                 <div class="media-left media-middle thumbs_block">
                                     <img class="media-object" src="${thumb_image}" alt="img"
-                                         style="max-width: 150px"/>
+                                         style="max-width: 150px" id="${btn_rotate_id}"/>
                                 </div>
                                 <div class="media-body">
                                     <p>${comment}</p>
@@ -374,6 +356,21 @@
                     $("#" + btn_delete_id).click(function () {
                         delete_image(id, title);
                     });
+                    $("#" + btn_rotate_id).click(()=>{
+                        if (confirm("确定逆时针旋转90度？")){
+                            $.post(
+                                "/image/rotate/",{
+                                    "id":id
+                                },()=>{
+                                    $("#" + btn_rotate_id).attr(
+                                        {
+                                            "src":thumb_image + "&rand=" + Math.random()
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    })
 
                 })
             });

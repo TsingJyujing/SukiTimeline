@@ -137,6 +137,24 @@ def modify_image(request):
 @login_required
 @csrf_exempt  # TODO 使用 AJAX 认证
 @response_json
+def rotate(request):
+    image_id = int(request.POST["id"])
+    angle = int(get_default(request.POST, "angle", "90"))
+    filename = "data/%d.jpg" % image_id
+    Image.open(
+        filename
+    ).rotate(
+        angle,
+        expand=True
+    ).save(
+        filename
+    )
+    return {"status": "success"}
+
+
+@login_required
+@csrf_exempt  # TODO 使用 AJAX 认证
+@response_json
 def remove_image(request):
     image_id = int(request.POST["id"])
     event_model = EventModel.objects.get(id=image_id)
