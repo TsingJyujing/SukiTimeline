@@ -28,10 +28,10 @@ urlpatterns = [
     url(r'^images/get/info', data_flow.views.get_image_info),
     url(r'^images/get/thumbnail', data_flow.views.get_image_resize),
     url(r'^images/get/raw', data_flow.views.get_image),
-
     url(r'^images/query', data_flow.views.query_images),
     url(r'^image/modify', data_flow.views.modify_image),
     url(r'^image/rotate', data_flow.views.rotate),
     url(r'^image/delete', data_flow.views.remove_image),
+    url(r'^image/upload/unsafe', data_flow.views.upload_file_unsafe),
     url(r'^image/upload', data_flow.views.upload_file),
 ]

@@ -158,3 +158,6 @@ venv.bak/
 
 data/*.jpg
 trash/*.jpg
+
+*.pkl
+*.sqlite3

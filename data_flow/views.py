@@ -20,11 +20,21 @@ from util.request_util import get_default
 
 @login_required
 def render_index(request):
+    """
+    渲染浏览界面
+    :param request:
+    :return:
+    """
     return render(request, "viewer.html")
 
 
 @login_required
 def render_editor(request):
+    """
+    渲染编辑器界面
+    :param request:
+    :return:
+    """
     current_page = int(get_default(request.GET, "n", "0"))
     keywords = get_default(request.GET, "q", "")
     return render(request, "editor.html", {
@@ -33,7 +43,13 @@ def render_editor(request):
     })
 
 
+@login_required
 def get_image_resize(request):
+    """
+    获取缩放过的图片
+    :param request:
+    :return:
+    """
     image_id = int(request.GET["id"])
     resize = [int(v) for v in get_default(request.GET, "resize", "320x240").split("x")]
     image = Image.open("data/%d.jpg" % image_id)
@@ -43,9 +59,10 @@ def get_image_resize(request):
         return HttpResponse(bio.getvalue(), content_type="image/jpeg")
 
 
+@login_required
 def get_image(request):
     """
-    获取某一张照片的信息
+    获取某一张照片（原图）
     :param request:
     :return:
     """
@@ -54,6 +71,7 @@ def get_image(request):
         return HttpResponse(fp.read(), content_type="image/jpeg")
 
 
+@login_required
 @response_json
 def get_image_info(request):
     """
@@ -75,10 +93,11 @@ def get_image_info(request):
     }
 
 
+@login_required
 @response_json
 def query_images(request):
     """
-    获取图片元数据的接口
+    用于查询（搜索）图片的信息
     :param request:
     :return:
     """
@@ -124,6 +143,11 @@ def query_images(request):
 @csrf_exempt  # TODO 使用 AJAX 认证
 @response_json
 def modify_image(request):
+    """
+    修改图片信息
+    :param request:
+    :return:
+    """
     event_model = EventModel.objects.get(id=int(request.POST["id"]))
     event_model.title = request.POST["title"]
     event_model.comment = request.POST["comment"]
@@ -138,6 +162,11 @@ def modify_image(request):
 @csrf_exempt  # TODO 使用 AJAX 认证
 @response_json
 def rotate(request):
+    """
+    旋转图片
+    :param request:
+    :return:
+    """
     image_id = int(request.POST["id"])
     angle = int(get_default(request.POST, "angle", "90"))
     filename = "data/%d.jpg" % image_id
@@ -156,6 +185,11 @@ def rotate(request):
 @csrf_exempt  # TODO 使用 AJAX 认证
 @response_json
 def remove_image(request):
+    """
+    删除某个图片
+    :param request:
+    :return:
+    """
     image_id = int(request.POST["id"])
     event_model = EventModel.objects.get(id=image_id)
     # 转储源文件，删除缩略图
@@ -165,9 +199,25 @@ def remove_image(request):
     return {"status": "success"}
 
 
+@login_required
+@csrf_exempt
+def upload_file(request):
+    """
+    上传照片（需要授权认证）
+    :param request:
+    :return:
+    """
+    return upload_file_unsafe(request)
+
+
 @csrf_exempt
 @response_json
-def upload_file(request):
+def upload_file_unsafe(request):
+    """
+    上传照片（不安全）
+    :param request:
+    :return:
+    """
     image = Image.open(request.FILES["file"])
     try:
         tick_info = exif_to_tick(image._getexif()[36867])
