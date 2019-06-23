@@ -1,20 +1,20 @@
 import os
-import time
-from io import BytesIO
 import shutil
 import sqlite3
+import time
+from io import BytesIO
 
 from PIL import Image
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
-import json
-
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
-from util.http_response import response_json
+
+from config import DATA_DIR, TRASH_DIR
 from data_flow.models import EventModel
 from util import tick_to_string, string_to_tick, exif_to_tick
+from util.http_response import response_json
 from util.request_util import get_default
 
 
@@ -52,7 +52,7 @@ def get_image_resize(request):
     """
     image_id = int(request.GET["id"])
     resize = [int(v) for v in get_default(request.GET, "resize", "320x240").split("x")]
-    image = Image.open("data/%d.jpg" % image_id)
+    image = Image.open(os.path.join(DATA_DIR, "%d.jpg" % image_id))
     with BytesIO() as bio:
         image.thumbnail((resize[0], resize[1]))
         image.save(bio, format="jpeg")
@@ -67,7 +67,7 @@ def get_image(request):
     :return:
     """
     image_id = int(request.GET["id"])
-    with open("data/%d.jpg" % image_id, "rb") as fp:
+    with open(os.path.join(DATA_DIR, "%d.jpg" % image_id), "rb") as fp:
         return HttpResponse(fp.read(), content_type="image/jpeg")
 
 
@@ -169,7 +169,7 @@ def rotate(request):
     """
     image_id = int(request.POST["id"])
     angle = int(get_default(request.POST, "angle", "90"))
-    filename = "data/%d.jpg" % image_id
+    filename = os.path.join(DATA_DIR, "%d.jpg" % image_id)
     Image.open(
         filename
     ).rotate(
@@ -193,7 +193,7 @@ def remove_image(request):
     image_id = int(request.POST["id"])
     event_model = EventModel.objects.get(id=image_id)
     # 转储源文件，删除缩略图
-    shutil.move("data/%d.jpg" % image_id, "trash/%d.jpg" % image_id)
+    shutil.move(os.path.join(DATA_DIR, "%d.jpg" % image_id), os.path.join(TRASH_DIR, "%d.jpg" % image_id))
     # 删除数据库记录
     event_model.delete()
     return {"status": "success"}

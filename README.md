@@ -6,6 +6,25 @@ Suki(好き)Timeline是一款时间轴Web工具，可以展示一条你定义的
 如果你连学习Python这么简单的语言的勇气都没有，你凭什么喜欢那个姑娘？
 
 ## 快速上手
+
+### Docker
+
+```bash
+docker run -it -p 8000:80 -v {Your Data Dir}:/data tsingjyujing/suki-timeline
+```
+
+需要注意的是，在`sukitl`卷中请提前准备好你的`config.py`和各个数据文件夹，数据库文件会自动创建。
+如果你还没有管理员账号，你可以使用：
+
+```bash
+docker run -it -v {Your Data Dir}:/data \
+    tsingjyujing/click-tracking-system \
+    /usr/bin/python3 docker_start.py --mode createsuperuser
+```
+
+创建一个。
+
+### 普通方式
 首先你需要一台 Linux 系统的主机，安装好 pip3。
 
 随后安装以下依赖：
@@ -23,6 +42,8 @@ Suki(好き)Timeline是一款时间轴Web工具，可以展示一条你定义的
 - 密码：sukitimeline
 
 可以用来管理账号密码
+
+
 
 ## 启用微信快速加图功能
 修改昵称范围之后，启动`wechat_loader.py`，按照指示登录，可以将收到的图片全部保存。注意发送的时候选择`原图`。
