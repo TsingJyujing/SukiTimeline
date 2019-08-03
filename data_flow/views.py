@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import shutil
 import sqlite3
@@ -229,7 +230,7 @@ def upload_file_unsafe(request):
     )
     emodel.save()
     image = image.convert("RGB")
-    image.save("data/%d.jpg" % emodel.id)
+    image.save(os.path.join(DATA_DIR, "%d.jpg" % emodel.id))
     return {
         "status": "success",
         "image_id": emodel.id
