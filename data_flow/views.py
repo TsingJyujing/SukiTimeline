@@ -194,7 +194,9 @@ def remove_image(request):
     image_id = int(request.POST["id"])
     event_model = EventModel.objects.get(id=image_id)
     # 转储源文件，删除缩略图
-    shutil.move(os.path.join(DATA_DIR, "%d.jpg" % image_id), os.path.join(TRASH_DIR, "%d.jpg" % image_id))
+    src_file_path = os.path.join(DATA_DIR, "%d.jpg" % image_id)
+    if os.path.exists(src_file_path):
+        shutil.move(src_file_path, os.path.join(TRASH_DIR, "%d.jpg" % image_id))
     # 删除数据库记录
     event_model.delete()
     return {"status": "success"}
